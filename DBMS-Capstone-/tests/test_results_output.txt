@@ -1,0 +1,131 @@
+===============================================================================================
+PAYROLL & ATTENDANCE SYSTEM — PHASES 1 TO 5 EXECUTION & VERIFICATION TRACE
+===============================================================================================
+
+[1] PHASE 1 & 2: 3NF SCHEMA & SEED DATA ROW COUNTS (12 Employees x 3 Months)
+-----------------------------------------------------------------------------------------------
+  - Department          :    4 rows
+  - Employee            :   12 rows
+  - Salary_Structure    :   12 rows
+  - Leave_Type          :    4 rows
+  - Leave_Request       :   20 rows
+  - Attendance          :  780 rows
+  - Payroll             :   36 rows
+
+[2] PHASE 3 — REPORT 1: MONTHLY ATTENDANCE SUMMARY (OCTOBER 2026)
+-----------------------------------------------------------------------------------------------
+Code     Employee Name          Dept                       WorkDays  Present  Leave  Late   Hours   Paid%
+-----------------------------------------------------------------------------------------------
+EMP001   Aarav Mehta            Human Resources & People         22     20.0      2     0   186.9  100.0%
+EMP002   Neha Kulkarni          Human Resources & People         22     22.0      0     0   207.0  100.0%
+EMP003   Rohan Verma            Core Software Engineering        22     22.0      0     2   205.1  100.0%
+EMP004   Priya Nair             Core Software Engineering        22     20.0      2     0   189.0  100.0%
+EMP005   Siddharth Iyer         Core Software Engineering        22     20.0      2     4   187.2  100.0%
+EMP006   Ananya Deshmukh        Core Software Engineering        22     22.0      0     2   206.6  100.0%
+EMP007   Vikram Rathore         Product & Cloud Operation        22     21.0      1     6   193.0  100.0%
+EMP008   Kavya Sharma           Finance, Tax & Compliance        22     22.0      0     0   205.6  100.0%
+EMP009   Arjun Chatterjee       Finance, Tax & Compliance        22     21.5      0     3   200.3   97.7%
+EMP010   Meera Krishnan         Product & Cloud Operation        22     22.0      0     1   207.9  100.0%
+EMP011   Devansh Kapoor         Product & Cloud Operation        22     20.0      2     3   187.4  100.0%
+EMP012   Tanya Bhatia           Core Software Engineering        22     21.5      0     3   201.1   97.7%
+
+[3] PHASE 3 — REPORT 2: MONTHLY SALARY SLIP SUMMARY (OCTOBER 2026)
+-----------------------------------------------------------------------------------------------
+Code     Employee Name         Basic(Earned)  Gross(Earned)        PF   TDS(Tax)   LOP Ded    Net Salary
+-----------------------------------------------------------------------------------------------
+EMP001   Aarav Mehta               95,000.00     169,250.00 11,400.00  16,570.67      0.00    141,079.33
+EMP002   Neha Kulkarni             62,000.00     108,100.00  7,440.00   5,488.60      0.00     94,971.40
+EMP003   Rohan Verma              115,000.00     206,250.00 13,800.00  24,266.67      0.00    167,983.33
+EMP004   Priya Nair                82,000.00     143,100.00  9,840.00  11,131.47      0.00    121,928.53
+EMP005   Siddharth Iyer            66,454.55     114,243.19  7,974.55   6,446.94  2,656.82     99,621.70
+EMP006   Ananya Deshmukh           54,000.00      92,700.00  6,480.00   3,790.80      0.00     82,229.20
+EMP007   Vikram Rathore            84,000.00     147,859.09 10,080.00  12,121.36  7,040.91    125,457.73
+EMP008   Kavya Sharma              90,000.00     159,500.00 10,800.00  14,542.67      0.00    133,957.33
+EMP009   Arjun Chatterjee          49,636.36      85,050.00  5,956.36   2,995.20  4,050.00     75,898.44
+EMP010   Meera Krishnan            78,000.00     135,900.00  9,360.00   9,825.40      0.00    116,514.60
+EMP011   Devansh Kapoor            42,545.45      72,593.18  5,105.45   1,716.51  9,306.82     65,571.22
+EMP012   Tanya Bhatia              42,000.00      71,304.55  5,040.00   1,649.50  3,395.45     64,415.05
+
+[4] PHASE 3 — REPORT 3: LATE-MARKS & PUNCTUALITY REPORT (OCTOBER 2026)
+-----------------------------------------------------------------------------------------------
+Code     Employee Name          Late Days  Total Late Min  Latest In  Penalty LOP Status
+-----------------------------------------------------------------------------------------------
+EMP007   Vikram Rathore                 6             180   10:05:00         1.0d  PENALTY APPLIED (3+ Late -> LOP)
+EMP005   Siddharth Iyer                 4              96   09:50:00         0.5d  PENALTY APPLIED (3+ Late -> LOP)
+EMP011   Devansh Kapoor                 3              73   09:52:00         0.5d  PENALTY APPLIED (3+ Late -> LOP)
+EMP012   Tanya Bhatia                   3              65   09:44:00         0.5d  PENALTY APPLIED (3+ Late -> LOP)
+EMP009   Arjun Chatterjee               3              62   09:48:00         0.5d  PENALTY APPLIED (3+ Late -> LOP)
+EMP003   Rohan Verma                    2              32   09:34:00         0.0d  WARNING (1-2 Late)
+EMP006   Ananya Deshmukh                2              23   09:31:00         0.0d  WARNING (1-2 Late)
+EMP010   Meera Krishnan                 1              10   09:25:00         0.0d  WARNING (1-2 Late)
+EMP001   Aarav Mehta                    0               0          -         0.0d  EXCELLENT (0 Late)
+EMP002   Neha Kulkarni                  0               0          -         0.0d  EXCELLENT (0 Late)
+EMP004   Priya Nair                     0               0          -         0.0d  EXCELLENT (0 Late)
+EMP008   Kavya Sharma                   0               0          -         0.0d  EXCELLENT (0 Late)
+
+[5] PHASE 3 — QUERY EXECUTION PLAN IMPROVEMENT (BEFORE vs AFTER INDEXES)
+-----------------------------------------------------------------------------------------------
+Report 3 Query (Late-Marks Report):
+  BEFORE Index Plan : SCAN e USING INDEX sqlite_autoindex_Employee_1 | SEARCH a USING INDEX sqlite_autoindex_Attendance_1 (emp_id=? AND att_date>? AND att_date<?) | USE TEMP B-TREE FOR ORDER BY
+  AFTER  Index Plan : SEARCH a USING COVERING INDEX idx_attendance_date_late_emp (is_late=? AND att_date>? AND att_date<?) | SEARCH e USING INTEGER PRIMARY KEY (rowid=?) | USE TEMP B-TREE FOR GROUP BY | USE TEMP B-TREE FOR ORDER BY
+  Index Applied     : idx_attendance_date_late_emp (is_late, att_date, emp_id, late_minutes, check_in)
+  200-Run Latency   : 11.521 ms (Before) -> 8.469 ms (After) [26.5% faster]
+
+Report 2 Query (Salary Slip Lookup):
+  BEFORE Index Plan : SCAN p USING INDEX sqlite_autoindex_Payroll_1 | SEARCH e USING INTEGER PRIMARY KEY (rowid=?)
+  AFTER  Index Plan : SEARCH p USING INDEX idx_payroll_period_emp (pay_year=? AND pay_month=?) | SEARCH e USING INTEGER PRIMARY KEY (rowid=?)
+  Index Applied     : idx_payroll_period_emp (pay_year, pay_month, emp_id)
+
+[6] PHASE 4 — SECURITY, RBAC, TRANSACTION & VALIDATION TEST SUITE (16 TEST CASES)
+-----------------------------------------------------------------------------------------------
+[PASS] T01 (VALID): Record valid on-time attendance (09:00 to 18:00)
+       Expected : Accepted; trigger computes work_hours=9.0, is_late=0, late_minutes=0
+       Actual   : Inserted & auto-computed work_hours=9h, is_late=0, late_minutes=0
+[PASS] T02 (BOUNDARY): Check-in at exact standard threshold 09:15:00
+       Expected : is_late=0, late_minutes=0 (inclusive grace boundary)
+       Actual   : Exact threshold 09:15:00 accepted as on-time: is_late=0, late_minutes=0
+[PASS] T03 (BOUNDARY): Check-in 1 minute past threshold at 09:16:00
+       Expected : is_late=1, late_minutes=1
+       Actual   : 09:16:00 flagged as late by trigger: is_late=1, late_minutes=1
+[PASS] T04 (INVALID): Duplicate attendance entry for (emp_id=3, att_date='2026-10-01')
+       Expected : Rejected by UNIQUE(emp_id, att_date) constraint & rolled back
+       Actual   : Rejected & rolled back: UNIQUE constraint failed: Attendance.emp_id, Attendance.att_date
+[PASS] T05 (INVALID): Attendance with check_out (09:30:00) < check_in (14:00:00)
+       Expected : Rejected by trigger trg_validate_attendance_before_insert
+       Actual   : Rejected by trigger: TRIGGER_ERROR [INVALID_CHECK_OUT]: check_out time must be strictly after check_in time.
+[PASS] T06 (INVALID): Mark employee PRESENT on an APPROVED leave date (2026-08-10)
+       Expected : Rejected by trigger trg_validate_attendance_before_update
+       Actual   : Rejected by trigger: TRIGGER_ERROR [ATTENDANCE_ON_APPROVED_LEAVE]: Cannot mark PRESENT/HALF_DAY on an approved leave date.
+[PASS] T07 (INVALID): Submit leave (2026-10-09..2026-10-12) overlapping approved leave (2026-10-08..2026-10-09)
+       Expected : Rejected by trigger trg_validate_leave_overlap_insert
+       Actual   : Rejected by trigger: TRIGGER_ERROR [LEAVE_OVERLAP]: Overlapping approved or pending leave dates exist for this employee.
+[PASS] T08 (BOUNDARY): Single-day leave (start_date = end_date = 2026-10-07) immediately adjacent to existing leave
+       Expected : Accepted without false-positive overlap error
+       Actual   : Accepted 1-day non-overlapping adjacent leave (start_date=end_date='2026-10-07'), leave_id=21
+[PASS] T09 (INVALID): Submit leave request with end_date ('2026-12-05') < start_date ('2026-12-10')
+       Expected : Rejected by trigger trg_validate_leave_overlap_insert / CHECK (end_date >= start_date)
+       Actual   : Rejected by trigger/check constraint: TRIGGER_ERROR [LEAVE_DATE_ORDER]: Leave end_date cannot be earlier than start_date.
+[PASS] T10 (INVALID): Submit 15-day Sick Leave exceeding 10-day annual_quota
+       Expected : Rejected by trigger trg_validate_leave_quota_insert
+       Actual   : Rejected by trigger: TRIGGER_ERROR [LEAVE_QUOTA_EXCEEDED]: Requested leave days exceed annual quota for this leave type.
+[PASS] T11 (INVALID): Attempt to set negative basic salary (basic_pay = -25000.00)
+       Expected : Rejected by trigger trg_validate_salary_positive_update & CHECK (basic_pay > 0)
+       Actual   : Rejected & rolled back: TRIGGER_ERROR [INVALID_SALARY]: basic_pay must be strictly greater than 0.
+[PASS] T12 (BOUNDARY): Attempt to set zero basic salary (basic_pay = 0.00)
+       Expected : Rejected by strict boundary CHECK (basic_pay > 0)
+       Actual   : Rejected & rolled back at 0 boundary: TRIGGER_ERROR [INVALID_SALARY]: basic_pay must be strictly greater than 0.
+[PASS] T13 (TRANSACTION_ROLLBACK): Atomic Salary Update + Payroll Run where Step 2 fails (recalc_month=13)
+       Expected : Full ROLLBACK; Step 1 Salary_Structure update is completely reverted
+       Actual   : Mid-transaction failure triggered full ROLLBACK; Salary_Structure.basic_pay remained unchanged at Rs. 115,000.00
+[PASS] T14 (RBAC_SECURITY): EMPLOYEE (EMP003) attempts to view another employee's (EMP001) Salary Slip
+       Expected : Blocked with PermissionDeniedError (Row-Level RBAC isolation)
+       Actual   : Blocked by RBAC Guard: RBAC_ACCESS_DENIED: Employee 'EMP003' (emp_id=3, role='EMPLOYEE') attempted unauthorized access to 'Salary Slip' belonging to emp_id=1. Employees may only access their own records.
+[PASS] T15 (RBAC_SECURITY): EMPLOYEE (EMP003) attempts to modify own Salary_Structure and run Payroll
+       Expected : Blocked with PermissionDeniedError (Requires role='HR_ADMIN')
+       Actual   : Both privilege escalation attempts blocked: [1] RBAC_ACCESS_DENIED: Actor 'EMP003' (role='EMPLOYEE') is not authorized to perform 'Update Salary Structure & Recalculate Payroll'. Requires role='HR_ADMIN'. | [2] RBAC_ACCESS_DENIED: Actor 'EMP003' (role='EMPLOYEE') is not authorized to perform 'Run Monthly Payroll Engine'. Requires role='HR_ADMIN'.
+[PASS] T16 (VALID_TRANSACTION): HR_ADMIN executes atomic Salary Structure revision + Payroll recalculation
+       Expected : COMMIT succeeds; Salary_Structure and Payroll updated atomically
+       Actual   : HR_ADMIN atomic transaction COMMITTED: updated EMP004 basic_pay=86,000, recomputed Oct 2026 net_salary=Rs. 127,942.93, and cleanly restored baseline.
+-----------------------------------------------------------------------------------------------
+TEST SUMMARY: 16/16 PASSED (0 FAILED)
+===============================================================================================
